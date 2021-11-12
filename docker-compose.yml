@@ -1,0 +1,23 @@
+
+version: "3"
+services:
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    links:
+      - node
+    ports:
+      - 80:80
+  node:
+    build:
+      context: .
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:5
+    ports:
+      - 27017:27017
+
+volumes:
+    monogo_data:
