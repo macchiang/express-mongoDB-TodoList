@@ -9,10 +9,10 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect("mongodb://mongo:27017/todolistDB", { useNewUrlParser: true, useUnifiedTopology: true });
 
 itemsSchema = mongoose.Schema({
   name: String,
@@ -42,46 +42,46 @@ const ListSchema = {
 const List = mongoose.model("List", ListSchema);
 
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
 
   const day = date.getDate();
   Item.find({}, (err, foundItems) => {
-    if(foundItems.length === 0){
+    if (foundItems.length === 0) {
       Item.insertMany(defaultItems, (err) => {
-        if(err){
+        if (err) {
           console.log(err);
         }
-        else{
+        else {
           console.log("succesfully done! [1]");
         }
       })
     }
-    
-    if(err){
+
+    if (err) {
       console.log(err);
     }
-    else{
-      res.render("list", {listTitle: day, newListItems: foundItems});
+    else {
+      res.render("list", { listTitle: day, newListItems: foundItems });
     }
   });
 
 });
 
-app.post("/", function(req, res){
+app.post("/", function (req, res) {
   const itemName = req.body.newItem;
   const listName = req.body.list;
 
-    const newItem = new Item({
-      name: itemName
-    });
-  
+  const newItem = new Item({
+    name: itemName
+  });
 
-  if(listName === date.getDate()){
+
+  if (listName === date.getDate()) {
     newItem.save();
     res.redirect('/');
   }
-  else{
-    List.findOne({name: listName}, (err, foundList) => {
+  else {
+    List.findOne({ name: listName }, (err, foundList) => {
       foundList.items.push(newItem);
       foundList.save();
       res.redirect("/" + listName);
@@ -95,23 +95,23 @@ app.post("/delete", (req, res) => {
   let itemID = req.body.checkBox;
   const listName = req.body.listName;
   console.log(listName);
-  if(listName === date.getDate()){
-    Item.findByIdAndDelete(itemID, (err)=>{
-      if(err){
+  if (listName === date.getDate()) {
+    Item.findByIdAndDelete(itemID, (err) => {
+      if (err) {
         console.log(err);
       }
-      else{
+      else {
         console.log("succsesfuly deleted item");
         res.redirect("/");
       }
     });
   }
-  else{
-    List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: itemID} } }, (err, foundList)=>{
-      if(err){
+  else {
+    List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: itemID } } }, (err, foundList) => {
+      if (err) {
         console.log(err);
       }
-      else{
+      else {
         res.redirect("/" + listName);
       }
     });
@@ -120,32 +120,32 @@ app.post("/delete", (req, res) => {
 
 app.get("/:customListNane", (req, res) => {
   const customListName = _.capitalize(req.params.customListNane);
-  
-  List.findOne({name: customListName}, (err, foundList) => {
-    if(err){
+
+  List.findOne({ name: customListName }, (err, foundList) => {
+    if (err) {
       console.log(err);
     }
-    else{
-      if(!foundList){
+    else {
+      if (!foundList) {
         let list = new List({
           name: customListName,
           items: defaultItems,
         });
         list.save();
-        res.redirect("/" + customListName);        
+        res.redirect("/" + customListName);
       }
-      else{
-        res.render("list", {listTitle: foundList.name, newListItems: foundList.items});
+      else {
+        res.render("list", { listTitle: foundList.name, newListItems: foundList.items });
       }
     }
   });
 
 });
 
-app.get("/about", function(req, res){
+app.get("/about", function (req, res) {
   res.render("about");
 });
 
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log(`Server has started succesfully`);
 });
