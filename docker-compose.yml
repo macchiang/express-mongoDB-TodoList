@@ -18,6 +18,8 @@ services:
     image: mongo:5
     ports:
       - 27017:27017
+    volumes:
+      - mongo_data:/data/db
 
 volumes:
-    monogo_data:
+    mongo_data:
